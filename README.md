@@ -31,11 +31,21 @@ You need to have following in order for this library to work as expected
 3. Numpy >= 1.14.0
 
 ## Training and evaluating our model
+Execute the following command for deploying on your choice datasets:
+- python mil_main.py
+
+This is the proposed architecture. 
+
+To further test the other baselines (baseline properties are mentioned in the above table), execute the following command:
+- python bl_1.py (for Baseline-1)
+- python bl_2.py (for Baseline-2)
+- python bl_3.py (for Baseline-3)
+- python bl_5.py (for Baseline-5)
 
 ## Code Author
 1. [Kausik Das](https://github.com/KausikDas-10/)
 
 ## Help us to improve
-Let us know if you face any issues. You are always welcome to report new issues and bugs and also suggest further improvements. And if you like our work hit that start button on top. Enjoy :)
+Let us know if you face any issues. You are always welcome to report new issues and bugs and also suggest further improvements. And if you like our work hit that star button on top. Enjoy :)
 
-
+## 
