@@ -1,5 +1,16 @@
 # Histopathology Whole Slide Classification with Multiple Instance Learning of Deep Convolutional Neural Networks
 
+## Abstract
+Histopathology whole slide images (WSI) are typically used for precise diagnostic reporting of tissue pathologies. Increase in number of histopathological examinations being performed, the development of vision based technologies for automating routine scan procedures is need of the hour. Convolutional neural networks (CNN) are popular used to learned visual feature representation in an end-to-end manner. In contrast to images used for vision inference, a typical WSI is in size 100,000$\times$100,000$\times$3 pixels. Also training a reliable classifier would require access to image patch specific labels. It require massive time to precisely search and label malignant region on such large size image by the pathologist. Clinically, a WSI is labeled malignant even when a trace evidence is found in it, while completely negative ones are only labeled as pathologically negative. This by property corresponds to the framework of multiple instance inference. In this paper we propose a new architecture and strategy of incorporating multiple instance learning (MIL) within a CNN. Each bag consist of small sized image patches, thereby reducing operational memory demand, with ability to learn using the label available only for the bag, thereby not being limited by lack of labels per patch of image. Furthermore this approach does not require any predetermined sampling of image patches from a WSI for classification. We evaluate performance of this method using the BreakHis, IUPHL and UCSB cancer datasets to achieve 93.06\%, 96.63\%, 95.83\% accuracy respectively for WSI classification which improves performance by factors of 4.79\%, 1.34\%, 2.22\% over their respective published prior art.
+
+## Highlights
+
+## Architecture
+
+## Baselines
+
+## Results
+
 ## Pre-requisites
 You need to have following in order for this library to work as expected
 1. Python >= 2.7
