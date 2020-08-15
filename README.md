@@ -20,10 +20,14 @@ Histopathology whole slide images (WSI) are typically used for precise diagnosti
 #### Configuration of the different incremental baselines are introduced below, to validate the salient attributes of the proposed architecture. Here, FC-Dim defines Fully Connected (FC) Layer at feature dimension (Dim) with respect to VGG-19 layer.
 <img src="ref_figs/baselines.png">
 
+** Codes of all the Baselines are available in this github repo. **
+
 #### Performance of different baselines are being tabulated here. Here, Acc., Rec., Spe. and F1-Score represent Accuracy, Recall, Specificity and F1-score repectively.
 <img src="ref_figs/baseline_results.png">
 
 ## Results
+#### Comparison with other MIL models 
+
 
 ## Pre-requisites
 You need to have following in order for this library to work as expected
