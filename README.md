@@ -19,14 +19,10 @@ Histopathology whole slide images (WSI) are typically used for precise diagnosti
 ## Baselines
 #### Configuration of the different incremental baselines are introduced below. Here, FC-Dim defines Fully Connected (FC) Layer at feature dimension (Dim) with respect to VGG-19 layer. 
 <img src="ref_figs/baselines.png">
-1. Code of these baselines are available here in these (github repo)[./Deep_MIL_WSI]
+1. Code of these baselines are available here in these github repo.
 
 #### Performance of different baselines are being tabulated here. Here, Acc., Rec., Spe. and F1-Score represent Accuracy, Recall, Specificity and F1-score repectively.
 <img src="ref_figs/baseline_results.png">
-
-## Results
-#### Comparison with other MIL models 
-
 
 ## Pre-requisites
 You need to have following in order for this library to work as expected
@@ -34,5 +30,12 @@ You need to have following in order for this library to work as expected
 2. Torch V7
 3. Numpy >= 1.14.0
 
+## Training and evaluating our model
+
+## Code Author
+1. [Kausik Das](https://github.com/KausikDas-10/)
+
+## Help us to improve
+Let us know if you face any issues. You are always welcome to report new issues and bugs and also suggest further improvements. And if you like our work hit that start button on top. Enjoy :)
 
 
