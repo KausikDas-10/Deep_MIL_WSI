@@ -16,11 +16,11 @@ Histopathology whole slide images (WSI) are typically used for precise diagnosti
 *An illustration of the deep convolutional neural network with multiple instance level semi-supervised models. Bag level representation is achieved by the strategy of instance features aggregation through feature level max-pooling layer (MIPool) at the feature embedding dimension of 4096. Multiple margin-based instance level loss is introduced at multiple levels of architecture as side level supervisions of the architecture. It aims to perform the instance level classification by inheriting the label from its corresponding bag. In this figure, the upper block comes to play during training and inference both of the time, whereas the lower block comes to play only during training time.*
 
 ## Baselines
+### Configuration of the different incremental baselines are introduced below, to validate the salient attributes of the proposed architecture. Here, FC-Dim defines Fully Connected (FC) Layer at feature dimension (Dim) with respect to VGG-19 layer.
 <img src="ref_figs/baselines.png">
-*Configuration of the different incremental baselines are introduced below, to validate the salient attributes of the proposed architecture. Here, FC-Dim defines Fully Connected (FC) Layer at feature dimension (Dim) with respect to VGG-19 layer.*
 
+### Performance of different baselines are being tabulated here. Here, Acc., Rec., Spe. and F1-Score represent Accuracy, Recall, Specificity and F1-score repectively.
 <img src="ref_figs/baseline_results.png">
-*Performance of different baselines are being tabulated here. Here, Acc., Rec., Spe. and F1-Score represent Accuracy, Recall, Specificity and F1-score repectively.*
 
 ## Results
 
