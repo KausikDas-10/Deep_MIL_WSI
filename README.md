@@ -11,7 +11,7 @@ Histopathology whole slide images (WSI) are typically used for precise diagnosti
 3. Third, to aid the training process of our deep CNN with MIPool layer (which sparsify the gradients), we propose to incorporate side-level supervision in the form of single instance losses at multiple locations. Further, the margin-level loss function is used to prevent noisy gradients, which single instance loss often provides.   
 
 ## Architecture
-<img src="ref_figs/main_block_2.png" width="100" height="100">
+<img src="ref_figs/main_block_2.png">
 
 ## Baselines
 
