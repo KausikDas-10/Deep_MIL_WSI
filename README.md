@@ -26,7 +26,7 @@ Histopathology whole slide images (WSI) are typically used for precise diagnosti
 
 ## Pre-requisites
 You need to have following in order for this library to work as expected
-1. Python >= 2.7
+1. Lua
 2. Torch v7
 
 ## Training and evaluating our model
