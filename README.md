@@ -28,19 +28,16 @@ Histopathology whole slide images (WSI) are typically used for precise diagnosti
 You need to have following in order for this library to work as expected
 1. Python >= 2.7
 2. Torch v7
-3. Numpy >= 1.14.0
 
 ## Training and evaluating our model
-Execute the following command for deploying on your choice datasets:
-- python mil_main.py
-
-This is the proposed architecture. 
+Execute the following command for deploying the proposed Deep_MIL architecture:
+- th mil_main.lua
 
 To further test the other baselines (baseline properties are mentioned in the above table), execute the following command:
-- python bl_1.py (for Baseline-1)
-- python bl_2.py (for Baseline-2)
-- python bl_3.py (for Baseline-3)
-- python bl_5.py (for Baseline-5)
+- th bl_1.lua (for Baseline-1)
+- th bl_2.lua (for Baseline-2)
+- th bl_3.lua (for Baseline-3)
+- th bl_5.lua (for Baseline-5)
 
 ## Code Author
 1. [Kausik Das](https://github.com/KausikDas-10/)
