@@ -266,7 +266,7 @@ NumMalTestBag = 7
 
 		for j = 1, numBenTrainBag do 
 
-			dir = '/home/deepkliv/Desktop/Kausik/MIL2/Biseque/Fold 1/Train/Benign/'..shuffleBen[j]
+			dir = './Biseque/Fold 1/Train/Benign/'..shuffleBen[j]
 			numOfIns = #pl.dir.getallfiles(dir, '*.png')      
 
 		   	if(numOfIns >= maxNumIns) then
@@ -289,7 +289,7 @@ NumMalTestBag = 7
 
 		for j = 1, numMalTrainBag do 
 
-			dir = '/home/deepkliv/Desktop/Kausik/MIL2/Biseque/Fold 1/Train/Malignant/'..shuffleMal[j]
+			dir = './Biseque/Fold 1/Train/Malignant/'..shuffleMal[j]
 			numOfIns = #pl.dir.getallfiles(dir, '*.png')      
 
 		   	if(numOfIns >= maxNumIns) then
@@ -381,7 +381,7 @@ for epoch = 1, 150 do
 		out_test = torch.Tensor(NumBenTestBag):fill(0)
 		for x = 1, NumBenTestBag do 
 
-			dir = '/home/deepkliv/Desktop/Kausik/MIL2/Biseque/Fold 1/Test/Benign/'..x
+			dir = './Biseque/Fold 1/Test/Benign/'..x
 			numOfIns = #pl.dir.getallfiles(dir, '*.png')      
 
 		   	if(numOfIns >= maxNumIns) then
@@ -414,7 +414,7 @@ for epoch = 1, 150 do
 		out_test = torch.Tensor(NumMalTestBag):fill(0)
 		for x = 1, NumMalTestBag do 
 
-			dir = '/home/deepkliv/Desktop/Kausik/MIL2/Biseque/Fold 1/Test/Malignant/'..x
+			dir = './Biseque/Fold 1/Test/Malignant/'..x
 			numOfIns = #pl.dir.getallfiles(dir, '*.png')      
 
 		   	if(numOfIns >= maxNumIns) then

@@ -5,7 +5,6 @@
 -- Testing MaxPool Layer at FC-Layer of Dim-4096 
 -- SoftMax and Negative_Log_Likelihood_Criterion as the Instance Level Classifiers.
 
--- DDSM FOR 200 Patents
 
 require 'nn'
 require 'cunn'
@@ -193,11 +192,11 @@ transformTest = t.Compose{
 ------------------- Load Data Set ------------------
 maxNumIns = 50
 
-numMalTrain = 1125
-numBenTrain = 1184
+numBenTrainBag = 23
+numMalTrainBag = 19
 
-NumMalTestBag = 495
-NumBenTestBag = 592
+NumBenTestBag = 9
+NumMalTestBag = 7
 
 -- maxNumBag = 1347
 
@@ -221,7 +220,7 @@ malTrainTensor = torch.Tensor(numMalTrain):fill(0)
 
 	for j = 1, numBenTrain do 
 
-		dir = '/home/deepkliv/Desktop/Kausik/MIL2/DDSM/DDSM_200_Patients/Fold 1/Benign/Train/'..shuffleBen[j]
+		dir = './Biseque/Fold 1/Train/Benign/'..shuffleBen[j]
 		numOfIns = #pl.dir.getallfiles(dir, '*.jpg')      
 
 	   	if(numOfIns >= maxNumIns) then
@@ -244,7 +243,7 @@ malTrainTensor = torch.Tensor(numMalTrain):fill(0)
 
 	for j = 1, numMalTrain do 
 
-		dir = '/home/deepkliv/Desktop/Kausik/MIL2/DDSM/DDSM_200_Patients/Fold 1/Malignant/Train/'..shuffleMal[j]
+		dir = './Biseque/Fold 1/Train/Malignant/'..shuffleMal[j]
 		numOfIns = #pl.dir.getallfiles(dir, '*.jpg')      
 
 	   	if(numOfIns >= maxNumIns) then
@@ -334,7 +333,7 @@ for epoch = 1, 150 do
 		out_test = torch.Tensor(NumBenTestBag):fill(0)
 		for x = 1, NumBenTestBag do 
 
-			dir = '/home/deepkliv/Desktop/Kausik/MIL2/DDSM/DDSM_200_Patients/Fold 1/Benign/Test/'..x
+			dir = './Biseque/Fold 1/Test/Benign/'..x
 			numOfIns = #pl.dir.getallfiles(dir, '*.jpg')      
 
 		   	if(numOfIns >= maxNumIns) then
@@ -367,7 +366,7 @@ for epoch = 1, 150 do
 		out_test = torch.Tensor(NumMalTestBag):fill(0)
 		for x = 1, NumMalTestBag do 
 
-			dir = '/home/deepkliv/Desktop/Kausik/MIL2/DDSM/DDSM_200_Patients/Fold 1/Malignant/Test/'..x
+			dir = './Biseque/Fold 1/Test/Malignant/'..x
 			numOfIns = #pl.dir.getallfiles(dir, '*.jpg')      
 
 		   	if(numOfIns >= maxNumIns) then
@@ -397,13 +396,13 @@ for epoch = 1, 150 do
 		print('Malignant Total Num Test --', 		NumMalTestBag)
 		print('Malignant Acc -- ',   				totalMalAcc)
 
-		print('Total Acc for DDSM Fold_1 BL_4 --', (totalBenTrue+totalMalTrue)/(NumMalTestBag+NumBenTestBag))
+		print('Total Acc for Fold_1 --', (totalBenTrue+totalMalTrue)/(NumMalTestBag+NumBenTestBag))
 
 		out_test = nil
 		output 	 = nil
 		inputs   = nil
 		
-		torch.save('DDSM_200_Fold_1_BL_4.t7', model_1:clearState())
+		torch.save('Fold_1_BL_3.t7', model_1:clearState())
 		collectgarbage()
 	end
 end
