@@ -5,6 +5,8 @@
 -- Testing MaxPool Layer at FC-Layer of Dim-4096 
 -- SoftMax and Negative_Log_Likelihood_Criterion as the Instance Level Classifiers.
 
+-- DDSM FOR 200 Patents
+
 require 'nn'
 require 'cunn'
 require 'cudnn'
@@ -17,17 +19,6 @@ pl = require('pl.import_into')()
 local t = require '/transforms'
 
 model = loadcaffe.load('VGG_ILSVRC_19_layers_deploy.prototxt', 'VGG_ILSVRC_19_layers.caffemodel', 'cudnn')
-
-model: remove(46)
-model: remove(45)
-
-model: add(nn.Max(1))
-model: add(nn.Linear(4096,1000))
-model: add(nn.ReLU(true))
-model: add(nn.Dropout(0.5))
-model: add(nn.Linear(1000,2))
-model: add(nn.LogSoftMax())
-
 
 --[[
 local auxArm_1 = nn.Sequential()
@@ -47,6 +38,7 @@ auxArm_3: add(cudnn.SpatialMaxPooling(14,14,1,1))
 auxArm_3: add(nn.Squeeze())
 auxArm_3: add(nn.Linear(512,1))
 auxArm_3: add(nn.Tanh())
+--]]
 
 local auxArm_4 = nn.Sequential()
 auxArm_4: add(nn.Linear(4096,1000))
@@ -55,7 +47,8 @@ auxArm_4: add(nn.Dropout(0.5))
 auxArm_4: add(nn.Linear(1000,1))
 auxArm_4: add(nn.Tanh())
 
-model_1 = nn.Sequential()
+--[[
+local model_1 = nn.Sequential()
 for layer = 1, 17 do 
 	model_1: add(model:get(layer))
 end
@@ -69,13 +62,14 @@ local model_3 = nn.Sequential()
 for layer = 28, 36 do
 	model_3: add(model:get(layer))
 end
+--]]
 
-local model_4 = nn.Sequential()
-for layer = 37, 41 do
-	model_4: add(model:get(layer))
+model_1 = nn.Sequential()
+for layer = 1, 41 do
+	model_1: add(model:get(layer))
 end
-model_4:remove(2) -- Removing (nn.View(-1)) Layer
-model_4:insert(nn.View(-1):setNumInputDims(3), 2) -- Inserting Reshaping Layer -- 
+model_1:remove(38) -- Removing (nn.View(-1)) Layer
+model_1:insert(nn.View(-1):setNumInputDims(3), 38) -- Inserting Reshaping Layer -- 
 
 local modelMax_1 = nn.Sequential()
 modelMax_1: add(nn.Max(1))
@@ -89,50 +83,15 @@ local conModel_1 = nn.ConcatTable()
 conModel_1: add(auxArm_4)
 conModel_1: add(modelMax_1)
 
-model_4: add(conModel_1)
-
-local conModel_2 = nn.ConcatTable()
-conModel_2: add(auxArm_3)
-conModel_2: add(model_4)
-
-model_3: add(conModel_2)
-
-local conModel_3 = nn.ConcatTable()
-conModel_3: add(auxArm_2)
-conModel_3: add(model_3)
-
-model_2: add(conModel_3) 
-
-local conModel_4 = nn.ConcatTable()
-conModel_4: add(auxArm_1)
-conModel_4: add(model_2)
-
-model_1: add(conModel_4): add(nn.FlattenTable())
+model_1: add(conModel_1)
 model_1 = model_1:cuda()
 
-model = nil
-collectgarbage()
---]]
-
---[[
-model: remove(46)
-
-model: add(cudnn.ReLU(true))
-model: add(nn.Dropout(0.5))
-model: add(nn.Linear(1000,2))
-
-model: add(nn.Max(1))
-model: add(nn.LogSoftMax())
---]]
-model = model:cuda()
-collectgarbage()
-
 -- Load trained model for FOLD 1
--- model_1 = torch.load('DDSM_Fold_1.t7')
+-- model_1 = torch.load('DDSM_200_Fold_1.t7')
 -- model_1 = model_1:cuda()
 
 local count = 0
-for i, m in ipairs(model.modules) do
+for i, m in ipairs(model_1.modules) do
    	if count == 4 then break end
    	if torch.type(m):find('Convolution') then
       	m.accGradParameters = function() end
@@ -140,17 +99,13 @@ for i, m in ipairs(model.modules) do
       	count = count + 1
    	end
 end
---[[
+
 marginCri = nn.MarginCriterion(0.4)
 crossEntropyCri = nn.ClassNLLCriterion()
 marginCri = marginCri:cuda()
 crossEntropyCri = crossEntropyCri:cuda()
 
-criterion = nn.ParallelCriterion():add(marginCri,0.1):add(marginCri,0.1):add(marginCri,0.1):add(marginCri,0.1):add(crossEntropyCri,1)
-criterion = criterion:cuda()
---]]
-
-criterion = nn.ClassNLLCriterion()
+criterion = nn.ParallelCriterion():add(marginCri,0.1):add(crossEntropyCri,1)
 criterion = criterion:cuda()
 
 func = function(x)
@@ -163,12 +118,12 @@ func = function(x)
 
         gradParameters:zero()
         
-        output = model:forward(inputs)
+        output = model_1:forward(inputs)
 		-- output[1] = sign(output[1]-0.75)
         
         f = criterion:forward(output,outputs)
         df_do = criterion:backward(output,outputs)
-        model:backward(inputs, df_do)
+        model_1:backward(inputs, df_do)
 
 		-- Add L1 Normalization
 		if coefL1 ~= 0 then
@@ -203,12 +158,12 @@ optimMethod = optim.sgd  --adadelta--cg--adam--adagrad--
 -- batch = 64
 coefL1 = 0
 coefL2 = 0
-parameters,gradParameters = model:getParameters()
+parameters,gradParameters = model_1:getParameters()
 
 ----------------------------------------------------
 --------------- Training Parameter -----------------
 meanstd = {
-   mean = { 202.76, 176.93, 221.01 },
+   mean = { 161.29, 161.29, 161.29 },
    std  = { 23.78,  23.78,  23.78  },
 }
 
@@ -238,17 +193,17 @@ transformTest = t.Compose{
 ------------------- Load Data Set ------------------
 maxNumIns = 50
 
-numBenTrainBag = 23
-numMalTrainBag = 19
+numMalTrain = 1125
+numBenTrain = 1184
 
-NumBenTestBag = 9
-NumMalTestBag = 7
+NumMalTestBag = 495
+NumBenTestBag = 592
 
 -- maxNumBag = 1347
-	trainTensorBen  = torch.Tensor(numBenTrainBag) :fill(0)
-	trainTensorMal  = torch.Tensor(numMalTrainBag) :fill(0)
--- benTrainTensor = torch.Tensor(maxNumBag):fill(0)
--- malTrainTensor = torch.Tensor(maxNumBag):fill(0)
+
+-- trainTensor = torch.Tensor(maxNumBag):fill(0)
+benTrainTensor = torch.Tensor(numBenTrain):fill(0)
+malTrainTensor = torch.Tensor(numMalTrain):fill(0)
  
 -- benTrainTable = torch.totable(trainTensor)
 -- malTrainTable = torch.totable(trainTensor)
@@ -256,133 +211,131 @@ NumMalTestBag = 7
 ---------------------------------------------------
 ---------------------------------------------------
 
-	local shuffleBen  = torch.randperm(numBenTrainBag)
-	local shuffleMal  = torch.randperm(numMalTrainBag)
-
-	-- for i = 1, torch.ceil(numMalTrain/maxNumBag) do
-
-		BenTrainTable  = torch.totable(trainTensorBen)
-		MalTrainTable  = torch.totable(trainTensorMal)
-
-		for j = 1, numBenTrainBag do 
-
-			dir = '/home/deepkliv/Desktop/Kausik/MIL2/Biseque/Fold 1/Train/Benign/'..shuffleBen[j]
-			numOfIns = #pl.dir.getallfiles(dir, '*.png')      
-
-		   	if(numOfIns >= maxNumIns) then
-				inputs = torch.Tensor(maxNumIns, 3, 224, 224):fill(0)
-			else
-				inputs = torch.Tensor(numOfIns,  3, 224, 224):fill(0)
-			end
-
-			count = 0
-			for i,f in ipairs(pl.dir.getallfiles(dir, '*.png')) do
-				-- img = (image.load(f): mul(256.0))
-				inputs[{{i},{},{},{}}] = transform(image.load(f): mul(256.0))
-				count = count + 1
-				if(count >= maxNumIns) then
-					break;
-				end
-			end      
-			BenTrainTable[j] = inputs;    					
-		end
-
-		for j = 1, numMalTrainBag do 
-
-			dir = '/home/deepkliv/Desktop/Kausik/MIL2/Biseque/Fold 1/Train/Malignant/'..shuffleMal[j]
-			numOfIns = #pl.dir.getallfiles(dir, '*.png')      
-
-		   	if(numOfIns >= maxNumIns) then
-				inputs = torch.Tensor(maxNumIns, 3, 224, 224):fill(0)
-			else
-				inputs = torch.Tensor(numOfIns,  3, 224, 224):fill(0)
-			end
-
-			count = 0
-			for i,f in ipairs(pl.dir.getallfiles(dir, '*.png')) do
-				-- img = image.load(f): mul(256.0)
-				inputs[{{i},{},{},{}}] = transform(image.load(f): mul(256.0))
-				count = count + 1
-				if(count >= maxNumIns) then
-					break;
-				end
-			end      
-			MalTrainTable[j] = inputs;    				
-		end
-	
-		print('Bag Image Loading Done')
-
-
 --- train at multiple bag level ---
+
+	local shuffleBen = torch.randperm(numBenTrain)
+	local shuffleMal = torch.randperm(numMalTrain)
+	
+	benTrainTable = torch.totable(benTrainTensor)
+	malTrainTable = torch.totable(malTrainTensor)
+
+	for j = 1, numBenTrain do 
+
+		dir = '/home/deepkliv/Desktop/Kausik/MIL2/DDSM/DDSM_200_Patients/Fold 1/Benign/Train/'..shuffleBen[j]
+		numOfIns = #pl.dir.getallfiles(dir, '*.jpg')      
+
+	   	if(numOfIns >= maxNumIns) then
+			inputs = torch.Tensor(maxNumIns, 3, 224, 224):fill(0)
+		else
+			inputs = torch.Tensor(numOfIns,  3, 224, 224):fill(0)
+		end
+
+		count = 0
+		for i,f in ipairs(pl.dir.getallfiles(dir, '*.jpg')) do
+			img = (image.load(f): mul(256.0))
+			inputs[{{i},{},{},{}}] = transform(torch.cat(torch.cat(img,img,1),img,1))
+			count = count + 1
+			if(count >= maxNumIns) then
+				break;
+			end
+		end      
+		benTrainTable[j] = inputs;    					
+	end
+
+	for j = 1, numMalTrain do 
+
+		dir = '/home/deepkliv/Desktop/Kausik/MIL2/DDSM/DDSM_200_Patients/Fold 1/Malignant/Train/'..shuffleMal[j]
+		numOfIns = #pl.dir.getallfiles(dir, '*.jpg')      
+
+	   	if(numOfIns >= maxNumIns) then
+			inputs = torch.Tensor(maxNumIns, 3, 224, 224):fill(0)
+		else
+			inputs = torch.Tensor(numOfIns,  3, 224, 224):fill(0)
+		end
+
+		count = 0
+		for i,f in ipairs(pl.dir.getallfiles(dir, '*.jpg')) do
+			img = image.load(f): mul(256.0)
+			inputs[{{i},{},{},{}}] = transform(torch.cat(torch.cat(img,img,1),img,1))
+			count = count + 1
+			if(count >= maxNumIns) then
+				break;
+			end
+		end      
+		malTrainTable[j] = inputs;    				
+	end		
+	print('Bag Image Loading Done')		
+
+	-------------------------------------------------------------
+	-------------------------------------------------------------
+
 for epoch = 1, 150 do 
 
 	print('epoch', epoch)
-	totErrPerEpoch = 0
+	
+	model_1:training()
 
-	local shuffleBen  = torch.cat(torch.randperm(numBenTrainBag), torch.randperm(numBenTrainBag))
-	local shuffleMal  = torch.cat(torch.randperm(numMalTrainBag), torch.randperm(numMalTrainBag))
-
-	model:training()
+	local shuffleBen = torch.cat(torch.randperm(numBenTrain), torch.randperm(numBenTrain))
+	local shuffleMal = torch.cat(torch.randperm(numMalTrain), torch.randperm(numMalTrain))
 
 	totErr = 0		
-	--- Push for Training 
-	for i = 1, numBenTrainBag do					
 
-		-- Push DCIS/cancerous Term
-		inputs  = MalTrainTable[shuffleMal[i]];
+	for i = 1, numBenTrain do					
+		-- Push Benign Term
+		inputs  = malTrainTable[shuffleMal[i]];
 		inputs  = inputs:cuda()
-
-		--[[
-		outputs = { torch.Tensor(inputs:size(1)):fill(1):cuda(), torch.Tensor(inputs:size(1)):fill(1):cuda(), 
-					torch.Tensor(inputs:size(1)):fill(1):cuda(), torch.Tensor(inputs:size(1)):fill(1):cuda(),
+		-- outputs = { 	torch.Tensor(inputs:size(1)):fill(1):cuda(), torch.Tensor(inputs:size(1)):fill(1):cuda(), 
+		-- 				torch.Tensor(inputs:size(1)):fill(1):cuda(), torch.Tensor(inputs:size(1)):fill(1):cuda(),
+		-- 				torch.Tensor{1}:cuda() }
+		
+		-- outputs = torch.Tensor{1}:cuda()	
+		outputs = { torch.Tensor(inputs:size(1)):fill(1):cuda(), 
 					torch.Tensor{1}:cuda() }
-		--]]
-		outputs = torch.Tensor{1}:cuda()
+
 
 		e_1 = 0
 		_, e_1 = optimMethod(func,parameters,state)
 		totErr = e_1[1] + totErr
 
-		-- Push UDH/non-cancerous Term
-		inputs  = BenTrainTable[shuffleBen[i]];
+		-- Push Benign Term
+		inputs  = benTrainTable[shuffleBen[i]];
 		inputs  = inputs:cuda()
+		-- outputs = { torch.Tensor(inputs:size(1)):fill(-1):cuda(), torch.Tensor(inputs:size(1)):fill(-1):cuda(), 
+		--			torch.Tensor(inputs:size(1)):fill(-1):cuda(), torch.Tensor(inputs:size(1)):fill(-1):cuda(),
+		--			torch.Tensor{2}:cuda() }
 		
-		--[[
-		outputs = { torch.Tensor(inputs:size(1)):fill(-1):cuda(), torch.Tensor(inputs:size(1)):fill(-1):cuda(), 
-					torch.Tensor(inputs:size(1)):fill(-1):cuda(), torch.Tensor(inputs:size(1)):fill(-1):cuda(),
+		-- outputs = torch.Tensor{2}:cuda()	
+		outputs = { torch.Tensor(inputs:size(1)):fill(-1):cuda(), 
 					torch.Tensor{2}:cuda() }
-		--]]
-		outputs = torch.Tensor{2}:cuda()
 
 		e_1 = 0
 		_, e_1 = optimMethod(func,parameters,state)
 		totErr = e_1[1] + totErr
 	end
 
-	totErr = totErr/(2*numBenTrainBag)
-	print('totErrPerEpoch--', totErr)
-	collectgarbage()		
+	totErr = totErr/(2*numBenTrain)
+	print('totErr--', totErr)
 	
 	--------------------------------------------------
 	------------------- Testing ----------------------	
 
 	if (epoch%10 == 0) then
 
-		model:evaluate()
+		model_1:evaluate()
 
 		print('Inside Testing')
 		print('epoch', epoch)
 
-		totalUDHTrue   = 0
-		totalUDHAcc    = 0
-		totalDCISTrue  = 0
-		totalDCISAcc   = 0
+		totalBenTrue  = 0
+		totalBenAcc   = 0
+		totalMalTrue  = 0
+		totalMalAcc   = 0
 
 		out_test = torch.Tensor(NumBenTestBag):fill(0)
 		for x = 1, NumBenTestBag do 
 
-			dir = '/home/deepkliv/Desktop/Kausik/MIL2/Biseque/Fold 1/Test/Benign/'..x
-			numOfIns = #pl.dir.getallfiles(dir, '*.png')      
+			dir = '/home/deepkliv/Desktop/Kausik/MIL2/DDSM/DDSM_200_Patients/Fold 1/Benign/Test/'..x
+			numOfIns = #pl.dir.getallfiles(dir, '*.jpg')      
 
 		   	if(numOfIns >= maxNumIns) then
 				inputs = torch.Tensor(maxNumIns, 3, 224, 224):fill(0)
@@ -391,17 +344,17 @@ for epoch = 1, 150 do
 			end
 
 			count = 0
-			for k,f in ipairs(pl.dir.getallfiles(dir, '*.png')) do
-				-- img = (image.load(f): mul(256.0))
-				inputs[{{k},{},{},{}}] = transformTest(image.load(f): mul(256.0))
+			for k,f in ipairs(pl.dir.getallfiles(dir, '*.jpg')) do
+				img = (image.load(f): mul(256.0))
+				inputs[{{k},{},{},{}}] = transformTest(torch.cat(torch.cat(img,img,1),img,1))
 				count = count + 1
 				if(count >= maxNumIns) then
 					break;
 				end
 			end      
 
-			output = model:forward(inputs:cuda())
-			oo,out_test[x] = torch.max(output:float(),1)
+			output = model_1:forward(inputs:cuda())
+			oo,out_test[x] = torch.max(output[2]:float(),1)
 		end
 
 		totalBenTrue = torch.sum(torch.eq(out_test:float(), torch.FloatTensor(NumBenTestBag):fill(2)))
@@ -414,8 +367,8 @@ for epoch = 1, 150 do
 		out_test = torch.Tensor(NumMalTestBag):fill(0)
 		for x = 1, NumMalTestBag do 
 
-			dir = '/home/deepkliv/Desktop/Kausik/MIL2/Biseque/Fold 1/Test/Malignant/'..x
-			numOfIns = #pl.dir.getallfiles(dir, '*.png')      
+			dir = '/home/deepkliv/Desktop/Kausik/MIL2/DDSM/DDSM_200_Patients/Fold 1/Malignant/Test/'..x
+			numOfIns = #pl.dir.getallfiles(dir, '*.jpg')      
 
 		   	if(numOfIns >= maxNumIns) then
 				inputs = torch.Tensor(maxNumIns, 3, 224, 224):fill(0)
@@ -424,43 +377,39 @@ for epoch = 1, 150 do
 			end
 
 			count = 0
-			for k,f in ipairs(pl.dir.getallfiles(dir, '*.png')) do
-				-- img = image.load(f): mul(256.0)
-				inputs[{{k},{},{},{}}] = transformTest(image.load(f): mul(256.0))
+			for k,f in ipairs(pl.dir.getallfiles(dir, '*.jpg')) do
+				img = image.load(f): mul(256.0)
+				inputs[{{k},{},{},{}}] = transform(torch.cat(torch.cat(img,img,1),img,1))
 				count = count + 1
 				if(count >= maxNumIns) then
 					break;
 				end
 			end    
 
-			output = model:forward(inputs:cuda())
-			oo,out_test[x] = torch.max(output:float(),1)
+			output = model_1:forward(inputs:cuda())
+			oo,out_test[x] = torch.max(output[2]:float(),1)
 		end
 
 		totalMalTrue = torch.sum(torch.eq(out_test:float(), torch.FloatTensor(NumMalTestBag):fill(1)))
 		totalMalAcc  = totalMalTrue/NumMalTestBag
 
 		print('Malignant Total TruePositive --' , 	totalMalTrue)
-		print('Malignant Total Num Test--', 		NumMalTestBag)
-		print('Malignant Acc  -- ',   				totalMalAcc)
+		print('Malignant Total Num Test --', 		NumMalTestBag)
+		print('Malignant Acc -- ',   				totalMalAcc)
 
-		print('Total Acc for Fold_1 BL_3--', (totalBenTrue+totalMalTrue)/(NumBenTestBag+NumMalTestBag))
+		print('Total Acc for DDSM Fold_1 BL_4 --', (totalBenTrue+totalMalTrue)/(NumMalTestBag+NumBenTestBag))
 
 		out_test = nil
 		output 	 = nil
 		inputs   = nil
-
-		torch.save('Biseque_BL_3_Fold_1.t7', model:clearState())
+		
+		torch.save('DDSM_200_Fold_1_BL_4.t7', model_1:clearState())
 		collectgarbage()
 	end
-
-	collectgarbage()
 end
 
 
-
 --------------  calculate mean//std  ---------------
-
 ----------------------------------------------------
 
 
